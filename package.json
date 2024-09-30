@@ -1,0 +1,37 @@
+{
+  "name": "crud-api-nodejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --env-file=.env --import=tsx --watch ./src/application/server.ts",
+    "compile": "npx tsc",
+    "start": "node ./dist/server.js",
+    "migrate:up": "node-pg-migrate up --no-commit --migrations-dir ./src/infra/data/migrations",
+    "migrate:down": "node-pg-migrate down --no-commit --migrations-dir ./src/infra/data/migrations"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "config": "^3.3.12",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-async-errors": "^3.1.1",
+    "helmet": "^7.1.0",
+    "knex": "^3.1.0",
+    "morgan": "^1.10.0",
+    "node-pg-migrate": "^7.7.0",
+    "pg": "^8.13.0",
+    "tsx": "^4.19.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/helmet": "^4.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/pg": "^8.11.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}
