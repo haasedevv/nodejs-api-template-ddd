@@ -1,13 +1,14 @@
 import ExampleEntity from "@/domain/entities/example.entity";
 import IExampleService from "@/domain/interfaces/services/example.interface";
 import CreateExample from "@/domain/models/request/example/create-example.model";
+import postgresKnex from "@/infra/data/context/pg.connection";
 import BaseRepository from "@/infra/data/repositories/base.repository";
 
 class ExampleService implements IExampleService {
   private exampleRepository: BaseRepository<ExampleEntity["props"]>;
 
   constructor() {
-    this.exampleRepository = new BaseRepository();
+    this.exampleRepository = new BaseRepository<ExampleEntity>(postgresKnex);
   }
 
   async getExample({ id }: { id: number }): Promise<ExampleEntity["props"] | null> {

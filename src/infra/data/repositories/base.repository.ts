@@ -1,50 +1,35 @@
-import DbContext from "../context/db.context";
-
+import { Knex } from "knex";
 class BaseRepository<T extends object> {
-  protected readonly db: DbContext;
+  protected readonly db: Knex;
 
-  constructor() {
-    this.db = new DbContext();
+  constructor(db: Knex) {
+    this.db = db;
   }
 
   public async add({ entity, table }: { entity: T; table: string }): Promise<T> {
     try {
-      const columns = Object.keys(entity)
-        .map((key) => `"${key}"`)
-        .join(", ");
-      const values = Object.values(entity);
-      const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
-      const query = `INSERT INTO "${table}" (${columns}) VALUES (${placeholders}) RETURNING *`;
-      const res = await this.db.query(query, values);
-
-      return res.rows[0];
+      const [result] = await this.db(table).insert(entity).returning("*");
+      return result;
     } catch (error) {
       console.error("Error adding entity:", error);
       throw error;
     }
   }
 
-  public async update<T extends object>({ entity, table, id }: { entity: T; table: string; id: number }): Promise<T> {
+  public async update({ entity, table, id }: { entity: T; table: string; id: number }): Promise<T> {
     try {
-      const columns = Object.keys(entity);
-      const values = Object.values(entity);
-      const setClause = columns.map((col, index) => `"${col}" = $${index + 1}`).join(", ");
-      const query = `UPDATE "${table}" SET ${setClause} WHERE id = ${id} RETURNING *`;
-      const res = await this.db.query(query, [...values]);
-
-      return res.rows[0];
+      const [result] = await this.db(table).where({ id }).update(entity).returning("*");
+      return result;
     } catch (error) {
       console.error("Error updating entity:", error);
       throw error;
     }
   }
 
-  public async delete({ id, table, column }: { id: number; table: string; column: string }): Promise<T> {
+  public async delete({ id, table }: { id: number; table: string }): Promise<T> {
     try {
-      const query = `DELETE FROM "${table}" WHERE "${column}" = $1 RETURNING *`;
-      const res = await this.db.query(query, [id]);
-
-      return res.rows[0];
+      const [result] = await this.db(table).where({ id }).del().returning("*");
+      return result;
     } catch (error) {
       console.error("Error deleting entity:", error);
       throw error;
@@ -53,10 +38,8 @@ class BaseRepository<T extends object> {
 
   public async findById({ id, table }: { id: number; table: string }): Promise<T | null> {
     try {
-      const query = `SELECT * FROM "${table}" WHERE id = $1`;
-      const res = await this.db.query(query, [id]);
-
-      return res.rows[0] || null;
+      const result = await this.db(table).where({ id }).first();
+      return result || null;
     } catch (error) {
       console.error("Error finding entity by ID:", error);
       throw error;
@@ -65,10 +48,8 @@ class BaseRepository<T extends object> {
 
   public async findAll({ table }: { table: string }): Promise<T[]> {
     try {
-      const query = `SELECT * FROM "${table}"`;
-      const res = await this.db.query(query);
-
-      return res.rows;
+      const results = await this.db(table).select("*");
+      return results;
     } catch (error) {
       console.error("Error finding all entities:", error);
       throw error;
